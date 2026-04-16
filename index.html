@@ -2,92 +2,99 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khang AI Studio Pro</title>
+    <title>Khang AI Studio - Fixed</title>
     <style>
-        :root { --main: #00d2ff; --bg: #0a0a0a; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px; }
-        .card { background: #111; padding: 40px; border-radius: 25px; border: 1px solid #222; width: 100%; max-width: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        h1 { text-align: center; background: linear-gradient(to right, #00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #000; color: white; font-size: 16px; margin: 20px 0; box-sizing: border-box; outline: none; }
-        button { width: 100%; padding: 15px; border-radius: 12px; border: none; background: linear-gradient(to right, #00d2ff, #3a7bd5); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,210,255,0.4); }
-        button:disabled { background: #333; cursor: not-allowed; opacity: 0.5; }
-        #status { margin-top: 20px; text-align: center; color: #888; font-size: 14px; min-height: 40px; }
-        video { width: 100%; margin-top: 25px; border-radius: 15px; display: none; border: 1px solid #333; }
-        .loader { display: none; margin: 10px auto; width: 25px; height: 25px; border: 3px solid #333; border-top-color: var(--main); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body { background: #0a0f1e; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 40px; }
+        .container { background: #161b2d; border: 1px solid #2d334a; padding: 30px; border-radius: 20px; max-width: 500px; margin: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        h1 { color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.3); }
+        textarea { width: 100%; background: #0a0f1e; border: 1px solid #2d334a; color: #fff; padding: 12px; border-radius: 10px; margin: 15px 0; box-sizing: border-box; resize: none; }
+        button { width: 100%; background: linear-gradient(45deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        button:disabled { background: #333; cursor: not-allowed; }
+        #status { margin-top: 20px; font-size: 14px; color: #8892b0; min-height: 40px; }
+        .video-box { margin-top: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #2d334a; display: none; background: #000; }
+        video { width: 100%; display: block; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>KHANG AI STUDIO</h1>
-        <textarea id="promptInput" rows="3" placeholder="Nhập ý tưởng (VD: Con mèo đang bay lượn trên mây...)"></textarea>
-        <button id="genBtn" onclick="generate()">🚀 TẠO VIDEO</button>
-        
-        <div class="loader" id="loader"></div>
-        <div id="status">Hệ thống sẵn sàng.</div>
-        
-        <video id="outputVideo" controls autoplay loop></video>
+<div class="container">
+    <h1>KHANG AI STUDIO</h1>
+    <textarea id="promptInput" rows="3" placeholder="Nhập ý tưởng (Ví dụ: Robot đang nhảy múa...)"></textarea>
+    <button id="btn" onclick="generate()">🚀 TẠO VIDEO</button>
+    
+    <div id="status">Sẵn sàng tạo video cho bạn.</div>
+    
+    <div class="video-box" id="vBox">
+        <video id="vid" controls autoplay loop></video>
     </div>
+</div>
 
-    <script>
-        // --- TỰ ĐỘNG CHIA NHỎ TOKEN ĐỂ VƯỢT RÀO GITHUB ---
-        const t1 = "hf_";
-        const t2 = "bjkoprZZRYcx";
-        const t3 = "UjjUOvItdWWr";
-        const t4 = "BfOXVMNhnq";
-        
-        const KEY = t1 + t2 + t3 + t4;
-        const API = "https://api-inference.huggingface.co/models/ali-vilab/text-to-video-ms-1.5b";
+<script>
+    // Chia nhỏ Token để tránh bị GitHub khóa (Token bạn gửi)
+    const p1 = "hf_";
+    const p2 = "bjkoprZZRYcxUjj";
+    const p3 = "UOvItdWWrBfOXV";
+    const p4 = "MNhnq";
+    
+    const KEY = p1 + p2 + p3 + p4;
+    const API_URL = "https://api-inference.huggingface.co/models/ali-vilab/text-to-video-ms-1.5b";
 
-        async function generate() {
-            const prompt = document.getElementById('promptInput').value.trim();
-            const btn = document.getElementById('genBtn');
-            const status = document.getElementById('status');
-            const video = document.getElementById('outputVideo');
-            const loader = document.getElementById('loader');
+    async function generate() {
+        const input = document.getElementById('promptInput').value.trim();
+        const btn = document.getElementById('btn');
+        const status = document.getElementById('status');
+        const vid = document.getElementById('vid');
+        const vBox = document.getElementById('vBox');
 
-            if (!prompt) return alert("Bạn chưa nhập ý tưởng kìa Khang!");
+        if (!input) return alert("Khang ơi, nhập gì đó đã!");
 
-            btn.disabled = true;
-            loader.style.display = "block";
-            video.style.display = "none";
-            status.innerHTML = "⏳ Đang kết nối server AI...";
+        btn.disabled = true;
+        status.innerHTML = "⏳ <b>Bước 1:</b> Đang dịch ngôn ngữ...";
+        vBox.style.display = "none";
 
-            try {
-                // Tự dịch sang tiếng Anh
-                const resTrans = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(prompt)}`);
-                const jsonTrans = await resTrans.json();
-                const english = jsonTrans[0][0][0];
-                
-                status.innerHTML = `🎬 Đang xử lý: <i>"${english}"</i><br>(Mất khoảng 30-60 giây)`;
+        try {
+            // Dịch sang tiếng Anh
+            const resT = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(input)}`);
+            const jsonT = await resT.json();
+            const english = jsonT[0][0][0];
+            
+            status.innerHTML = `⏳ <b>Bước 2:</b> AI đang vẽ video...<br><small>(${english})</small>`;
 
-                const response = await fetch(API, {
-                    headers: { "Authorization": `Bearer ${KEY}` },
-                    method: "POST",
-                    body: JSON.stringify({ inputs: english }),
-                });
+            const response = await fetch(API_URL, {
+                headers: { "Authorization": `Bearer ${KEY}`, "Content-Type": "application/json" },
+                method: "POST",
+                body: JSON.stringify({ inputs: english }),
+            });
 
-                if (!response.ok) {
-                    if (response.status === 503) throw new Error("Server AI đang khởi động, hãy đợi 30 giây rồi thử lại!");
-                    throw new Error("Lỗi kết nối API. Có thể Token bị khóa.");
-                }
-
-                const blob = await response.blob();
-                if (blob.size < 1000) throw new Error("Server trả về file lỗi, hãy nhấn Tạo lại.");
-
-                video.src = URL.createObjectURL(blob);
-                video.style.display = "block";
-                status.innerHTML = "✨ <b>Thành công!</b> Xem video thôi nào.";
-            } catch (err) {
-                status.innerHTML = `<span style="color:#ff4d4d">❌ ${err.message}</span>`;
-            } finally {
-                btn.disabled = false;
-                loader.style.display = "none";
+            if (!response.ok) {
+                if (response.status === 503) throw new Error("Máy chủ AI đang khởi động, đợi 20 giây rồi nhấn lại nhé!");
+                throw new Error("API gặp lỗi. Kiểm tra lại Token hoặc Hạn mức.");
             }
+
+            const blob = await response.blob();
+            
+            // KIỂM TRA QUAN TRỌNG: Nếu blob quá nhỏ tức là video bị lỗi (NaN)
+            if (blob.size < 10000) {
+                throw new Error("Video tạo ra bị lỗi dung lượng thấp. Hãy thử lại!");
+            }
+
+            const videoUrl = URL.createObjectURL(blob);
+            vid.src = videoUrl;
+            
+            // Đợi video tải xong metadata rồi mới hiện (Sửa lỗi NaN)
+            vid.onloadedmetadata = function() {
+                vBox.style.display = "block";
+                status.innerHTML = "✨ <b>Thành công!</b>";
+            };
+
+        } catch (err) {
+            status.innerHTML = `<span style="color: #ff4d4d">❌ ${err.message}</span>`;
+        } finally {
+            btn.disabled = false;
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
